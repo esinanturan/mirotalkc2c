@@ -9,7 +9,7 @@
  * @license For private project or commercial purposes contact us at: license.mirotalk@gmail.com or purchase it directly via Code Canyon:
  * @license https://codecanyon.net/item/mirotalk-c2c-webrtc-real-time-cam-2-cam-video-conferences-and-screen-sharing/43383005
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.2.75
+ * @version 1.2.76
  */
 
 const roomId = new URLSearchParams(window.location.search).get('room');
@@ -1231,6 +1231,9 @@ function toggleSettings() {
 }
 
 function swapCamera() {
+    if (recording && recording.isStreamRecording()) {
+        return popupMessage('toast', 'Recording', 'Cannot swap camera while recording', 'top');
+    }
     camera = camera == 'user' ? 'environment' : 'user';
     const camVideo = camera == 'user' ? true : { facingMode: { exact: camera } };
     navigator.mediaDevices
@@ -1252,6 +1255,9 @@ function swapCamera() {
 }
 
 async function toggleScreenSharing() {
+    if (recording && recording.isStreamRecording()) {
+        return popupMessage('toast', 'Recording', 'Cannot toggle screen sharing while recording', 'top');
+    }
     const constraints = { audio: true, video: true };
     try {
         let newStream;
@@ -1298,6 +1304,9 @@ async function toggleScreenSharing() {
 }
 
 function changeCamera(deviceId = false) {
+    if (recording && recording.isStreamRecording()) {
+        return popupMessage('toast', 'Recording', 'Cannot change camera while recording', 'top');
+    }
     const videoConstraints = getVideoConstraints(deviceId);
 
     navigator.mediaDevices
@@ -1331,6 +1340,9 @@ function changeCamera(deviceId = false) {
 }
 
 function changeMicrophone(deviceId = false) {
+    if (recording && recording.isStreamRecording()) {
+        return popupMessage('toast', 'Recording', 'Cannot change microphone while recording', 'top');
+    }
     const audioConstraints = getAudioConstraints(deviceId);
 
     navigator.mediaDevices

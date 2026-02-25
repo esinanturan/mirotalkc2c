@@ -12,6 +12,7 @@ class Recording {
         this._recordedBlobs = [];
         this._recordingStream = false;
         this._recStartTs = null;
+        this._trackEndedListeners = [];
     }
 
     start() {
@@ -20,7 +21,8 @@ class Recording {
         options = { mimeType: options[0] };
         try {
             this._mediaRecorder = new MediaRecorder(this._stream, options);
-            this._mediaRecorder.start();
+            this._mediaRecorder.start(1000);
+            this._listenTrackEnded();
             this._mediaRecorder.addEventListener('start', (e) => {
                 playSound('recStart');
                 console.log('MediaRecorder started', e);
@@ -36,6 +38,7 @@ class Recording {
             this._mediaRecorder.addEventListener('stop', (e) => {
                 this._recordingStream = false;
                 console.log('MediaRecorder stopped', e);
+                this._removeTrackEndedListeners();
                 this.handleElements();
                 stopRecordingTimer();
                 this.downloadRecordedStream();
@@ -148,5 +151,29 @@ class Recording {
 
     stop() {
         this._mediaRecorder.stop();
+    }
+
+    _listenTrackEnded() {
+        this._stream.getTracks().forEach((track) => {
+            const handler = () => {
+                console.warn('Recording track ended during recording:', track.kind, track.label);
+                if (this._mediaRecorder && this._mediaRecorder.state === 'recording') {
+                    try {
+                        this._mediaRecorder.requestData();
+                    } catch (e) {
+                        console.warn('requestData after track ended failed:', e);
+                    }
+                }
+            };
+            track.addEventListener('ended', handler);
+            this._trackEndedListeners.push({ track, handler });
+        });
+    }
+
+    _removeTrackEndedListeners() {
+        this._trackEndedListeners.forEach(({ track, handler }) => {
+            track.removeEventListener('ended', handler);
+        });
+        this._trackEndedListeners = [];
     }
 }
