@@ -6,7 +6,7 @@ window.APP_CONFIG = {
         showCopyright: true,
         about: {
             show: true,
-            url: 'https://docs.mirotalk.com/sites/c2c.html',
+            url: 'https://docs.mirotalk.com/sites/c2c',
         },
     },
 };
